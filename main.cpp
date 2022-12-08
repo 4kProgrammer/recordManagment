@@ -12,8 +12,6 @@ int main(int argc, char *argv[])
 
     qmlRegisterSingletonType<RecorderPageManagement>("com.test.RecorderPageManagment", 1, 0, "RecorderPageManagment", &RecorderPageManagement::qmlInstance);
 
-    //RecorderPageManagement *rec=RecorderPageManagement::instance();
-    //rec->addPageNumberToUsedList(1,1000,true,false);
 
     QGuiApplication app(argc, argv);
 

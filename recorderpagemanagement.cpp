@@ -11,69 +11,67 @@ RecorderPageManagement::RecorderPageManagement(QObject *parent) : QObject(parent
 
 bool RecorderPageManagement::addPageNumberToUsedList(qint32 currentPageNumber,qint32 totalTime,bool firstRequest,bool startRecord){
 
-    static QString warningMessage={};
-    static bool pageAmongPageForRecordFounded=false;
-    static bool canAssignThisPageForRecord=false;
     if(firstRequest==true){
-        warningMessage.clear();
+        messageString.clear();
         pageAmongPageForRecordFounded=false;
         canAssignThisPageForRecord=false;
         recorderPagesUsedTemp=recorderPagesUsed;
+        lastUsedRecordPagesInTestTemp={};
     }
 
 
     if(currentPageNumber>=recorderPagesCapacity.length() || currentPageNumber<=0 ){//Guard clause
         //
         if(firstRequest==false){
-            warningMessage.append("This mission not completely record, totalTime exceed recorderPageCapacity");
+            messageString.append("This mission not completely record, totalTime exceed recorderPageCapacity");
 
         } else{
             if(currentPageNumber==0){
-                warningMessage.append("mission not record");
+                messageString.append("Mission Not Record");
             }else{
-                warningMessage.append("This page recoder is not exit");
+                messageString.append("This page recoder is not exit");
             }
 
         }
 
-        if(startRecord==true){
-            recorderPagesUsed=recorderPagesUsedTemp;
-        }
-        qDebug()<<warningMessage;
-        showMessageToUserAndEndFunction(warningMessage);
-        setWarningMessage(warningMessage);
+        showMessageToUserAndEndFunction(messageString);
+        setWarningMessage(messageString);
         return canAssignThisPageForRecord;
     }
 
+    if(recorderPagesUsed.at(currentPageNumber-1)==1){
+        if(firstRequest==true){
+            messageString.append("This recode Page Used Before:");
+            messageString.append(QString::number(currentPageNumber));
+            if(startRecord==true){
+                recorderPagesUsed=recorderPagesUsedTemp;
+            }
+            showMessageToUserAndEndFunction(messageString);
+            setWarningMessage(messageString);
+            return canAssignThisPageForRecord;
+        } else{
+            if(pageAmongPageForRecordFounded==false){
+                messageString.append("one page among pages that need for record used:");
+                messageString.append(QString::number(currentPageNumber));
+                pageAmongPageForRecordFounded=true;
+            }else{
+                messageString.append(",");
+                messageString.append(QString::number(currentPageNumber));
+            }
+        }
+    }else{
+        recorderPagesUsedTemp.replace(currentPageNumber-1,1);
+        lastUsedRecordPagesInTestTemp<<currentPageNumber;
+        if(startRecord==true){
+            recorderPagesUsed=recorderPagesUsedTemp;
+            lastUsedRecordPagesInTest=lastUsedRecordPagesInTestTemp;
+        }
+    }
 
     //if totalTime<recorercapaicty.at(currentPage-1) --totoalTime set to zero and avoid to recurcive function continue
     qint32 timeRemider=totalTime-recorderPagesCapacity.at(currentPageNumber-1);
     if(timeRemider<0){
         timeRemider=0;
-    }
-    if(recorderPagesUsed.at(currentPageNumber-1)==1){
-        if(firstRequest==true){
-            warningMessage.append("This recode Page Used Before:");
-            warningMessage.append(QString::number(currentPageNumber));
-            if(startRecord==true){
-                recorderPagesUsed=recorderPagesUsedTemp;
-            }
-           // qDebug()<<warningMessage;
-            showMessageToUserAndEndFunction(warningMessage);
-            setWarningMessage(warningMessage);
-            return canAssignThisPageForRecord;
-        } else{
-            if(pageAmongPageForRecordFounded==false){
-                warningMessage.append("one page among pages that need for record used:");
-                warningMessage.append(QString::number(currentPageNumber));
-                pageAmongPageForRecordFounded=true;
-            }else{
-                warningMessage.append(",");
-                warningMessage.append(QString::number(currentPageNumber));
-            }
-        }
-    }else{
-       recorderPagesUsedTemp.replace(currentPageNumber-1,1);
     }
 
     if(timeRemider>0){
@@ -81,28 +79,25 @@ bool RecorderPageManagement::addPageNumberToUsedList(qint32 currentPageNumber,qi
 
         firstRequest=false;
         addPageNumberToUsedList(nextPageNumber,timeRemider,false,startRecord);
-    }
-    //
+    }else{
+        showMessageToUserAndEndFunction(messageString);
+        messageString.append("True");
+        setWarningMessage(messageString);
+        canAssignThisPageForRecord=true;
+        return canAssignThisPageForRecord;
 
-    if(startRecord==true){
-      recorderPagesUsed=recorderPagesUsedTemp;
     }
-    qDebug()<<warningMessage;
-    showMessageToUserAndEndFunction(warningMessage);
-    warningMessage.append(QString::number(canAssignThisPageForRecord));
-    setWarningMessage(warningMessage);
     return canAssignThisPageForRecord;
+
 }
 
 QVariantList RecorderPageManagement::recommedPageNumberForRecord(qint32 totalTime){
     QVariantList recommedPages={};
-    recorderPagesUsed={0,0,0,1,0,0,0,0,0,0};
-    for(int pageNumberIndex=1;pageNumberIndex<11;pageNumberIndex++){
-            qDebug()<<pageNumberIndex<<totalTime;
-            bool canAssignThisPageForRecord=addPageNumberToUsedList(pageNumberIndex,totalTime,true,false);
-            if(canAssignThisPageForRecord==true){
-                recommedPages<<pageNumberIndex;
-            }
+    for(int pageNumberIndex=1;pageNumberIndex<=recorderPagesCapacity.length();pageNumberIndex++){
+        bool canAssignThisPageForRecord=addPageNumberToUsedList(pageNumberIndex,totalTime,true,false);
+        if(canAssignThisPageForRecord==true){
+            recommedPages<<pageNumberIndex;
+        }
     }
     return recommedPages;
 }
@@ -110,9 +105,9 @@ QVariantList RecorderPageManagement::recommedPageNumberForRecord(qint32 totalTim
 void RecorderPageManagement::addPageNumberToUsedList_test(){
     recorderPagesUsed={0,0,0,1,0,0,0,0,0,0};
     for(int pageNumberIndex=-1;pageNumberIndex<12;pageNumberIndex++){
-//        for(int recorderPagesUsedIndex=0;recorderPagesUsedIndex<10;recorderPagesUsedIndex++){
-//          recorderPagesUsed.replace(recorderPagesUsedIndex,1);
-//        }
+        //        for(int recorderPagesUsedIndex=0;recorderPagesUsedIndex<10;recorderPagesUsedIndex++){
+        //          recorderPagesUsed.replace(recorderPagesUsedIndex,1);
+        //        }
         for(int totalTimeIndex=1;totalTimeIndex<50000;totalTimeIndex++){
             qDebug()<<pageNumberIndex<<totalTimeIndex;
             addPageNumberToUsedList(pageNumberIndex,totalTimeIndex,true,false);
@@ -123,6 +118,31 @@ void RecorderPageManagement::addPageNumberToUsedList_test(){
 void RecorderPageManagement::showMessageToUserAndEndFunction(QString message)
 {
     emit showMessageToUser(message);
+}
+
+void RecorderPageManagement::correctUsedRecordPage(qint32 correctTotolTime)
+{
+    for(int i=0;i<lastUsedRecordPagesInTest.length();i++){
+        correctTotolTime=correctTotolTime-recorderPagesCapacity.at(lastUsedRecordPagesInTest.at(i)-1);
+        if(correctTotolTime<=0){
+            recorderPagesUsed.replace(lastUsedRecordPagesInTest.at(i)-1,0);
+        }
+    }
+}
+
+bool RecorderPageManagement::resetUsedPage()
+{
+
+}
+
+bool RecorderPageManagement::readRecorderPageInfoFronFile()
+{
+
+}
+
+bool RecorderPageManagement::saveRecorderPageInfoInFile()
+{
+
 }
 
 RecorderPageManagement *RecorderPageManagement::instance()

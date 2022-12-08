@@ -16,30 +16,98 @@ Window {
 
         }
     }
+    Column{
+        width: parent.width
+        height: 200
+        spacing: 5
 
-    Row{
-        TextField{
-            width: 100
+        Row{
+            width: parent.width
             height: 40
-
-            onTextChanged: {
-                var canPageAddressAssighnable= RecorderPageManagment.addPageNumberToUsedList(parseInt(text),parseInt(text_totalTime.text),true,false);
+            TextField{
+                id:tf_pageAddress
+                anchors.verticalCenter: parent.verticalCenter
+                width: 100
+                height: parent.height
+                onTextChanged: {
+                    console.log("parseInt(tf_pageAddress.text)"+parseInt(tf_pageAddress.text))
+                    var canPageAddressAssighnable= RecorderPageManagment.addPageNumberToUsedList(parseInt(tf_pageAddress.text),parseInt(text_totalTime.text),true,false);
+                }
             }
-        }
-        Text {
-            width: 200
-            height: 40
-            text: RecorderPageManagment.warningMessage
-        }
-        TextField{
-             id:text_totalTime
-            width: 100
-            height: 40
+            Button{
+                id:btn_suggestRecorderPage
+                anchors.verticalCenter: parent.verticalCenter
+                width: 100
+                height: parent.height
+                text: "suggest Page add"
+                onClicked: {
+                     var suggestRecorderPageList= RecorderPageManagment.recommedPageNumberForRecord(parseInt(text_totalTime.text));
+                     console.log("su"+suggestRecorderPageList)
+                    if(suggestRecorderPageList.length>0){
+                        tf_pageAddress.text=suggestRecorderPageList[0];
+                    }
+                }
+
+
+            }
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                width: 150
+                wrapMode: Text.Wrap
+                height: parent.height
+                text: RecorderPageManagment.warningMessage
+            }
+            TextField{
+                id:text_totalTime
+                anchors.verticalCenter: parent.verticalCenter
+                width: 100
+                height: parent.height
+                onTextChanged: {
+                    var canPageAddressAssighnable= RecorderPageManagment.addPageNumberToUsedList(parseInt(tf_pageAddress.text),parseInt(text_totalTime.text),true,false);
+
+                }
+
+            }
+
+            Button{
+                id:startScenario
+                anchors.verticalCenter: parent.verticalCenter
+                width: 100
+                height: parent.height
+                text: "start Scenario"
+                onClicked: {
+                     var canPageAddressAssighnable= RecorderPageManagment.addPageNumberToUsedList(parseInt(tf_pageAddress.text),parseInt(text_totalTime.text),true,true);
+                }
+
+
+            }
 
         }
 
+        Row{
+            width: parent.width
+            height: 40
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                width: 200
+                height: parent.height
+                text: "actual last Senario time"
+            }
+            TextField{
+                id:tf_actualLastScenarioTime
+                anchors.verticalCenter: parent.verticalCenter
+                width: 100
+                height: parent.height
+            }
+            Button{
+                id:btn_correctLastScenarioRecord
+                anchors.verticalCenter: parent.verticalCenter
+                text: "correct Last Scenario Record"
+                onClicked: {
+                    RecorderPageManagment.correctUsedRecordPage(parseInt(tf_actualLastScenarioTime));
+                }
+            }
+
+        }
     }
-
-
-
 }
