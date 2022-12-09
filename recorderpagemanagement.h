@@ -17,7 +17,7 @@ public:
     static QObject *qmlInstance(QQmlEngine *engine, QJSEngine *scriptEngine);
 
 
-    Q_INVOKABLE bool addPageNumberToUsedList(qint32 currentPageNumber,qint32 totalTime,bool firstRequest,bool startRecord);
+    Q_INVOKABLE bool addPageNumberToUsedList(qint32 currentPageNumber,qint32 totalTime,bool firstRequest,bool startRecord,bool showMessageEnabled);
     Q_INVOKABLE QVariantList recommedPageNumberForRecord(qint32 totalTime);
     void addPageNumberToUsedList_test();
 
@@ -28,6 +28,8 @@ public:
     Q_INVOKABLE bool resetUsedPage();
     Q_INVOKABLE bool readRecorderPageInfoFronFile();
     Q_INVOKABLE bool saveRecorderPageInfoInFile();
+
+    void generateMokingRecorderStructureFile();
 
 
     QString warningMessage() const
@@ -51,9 +53,11 @@ private:
     bool canAssignThisPageForRecord=false;
     QString messageString={};
 
-    QList<quint32> recorderPagesCapacity={200,200,500,1000,1200,350,450,80,4200,1000};
-    QList<qint32> recorderPagesUsedTemp={0,0,0,0,0,0,0,0,0,0};
-    QList<qint32> recorderPagesUsed={0,0,0,0,0,0,0,0,0,0};
+    QList<quint32> recorderPagesCapacity={};
+    QList<qint32> recorderPagesUsedTemp={};
+    QList<qint32> recorderPagesUsed={};
+    QList<qint32> recordPageUseInTestNumber={};
+    QList<qint32> corruptedRecordPage={};
     QList<qint32> lastUsedRecordPagesInTestTemp={};
     QList<qint32> lastUsedRecordPagesInTest={};
 

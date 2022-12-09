@@ -29,9 +29,11 @@ Window {
                 anchors.verticalCenter: parent.verticalCenter
                 width: 100
                 height: parent.height
-                onTextChanged: {
+                text: "10"
+                onTextEdited:  {
+                    console.log("parseInt(tf_pageAddress.text)")
                     console.log("parseInt(tf_pageAddress.text)"+parseInt(tf_pageAddress.text))
-                    var canPageAddressAssighnable= RecorderPageManagment.addPageNumberToUsedList(parseInt(tf_pageAddress.text),parseInt(text_totalTime.text),true,false);
+                    var canPageAddressAssighnable= RecorderPageManagment.addPageNumberToUsedList(parseInt(tf_pageAddress.text),parseInt(text_totalTime.text),true,false,true);
                 }
             }
             Button{
@@ -63,7 +65,7 @@ Window {
                 width: 100
                 height: parent.height
                 onTextChanged: {
-                    var canPageAddressAssighnable= RecorderPageManagment.addPageNumberToUsedList(parseInt(tf_pageAddress.text),parseInt(text_totalTime.text),true,false);
+                    var canPageAddressAssighnable= RecorderPageManagment.addPageNumberToUsedList(parseInt(tf_pageAddress.text),parseInt(text_totalTime.text),true,false,true);
 
                 }
 
@@ -76,7 +78,7 @@ Window {
                 height: parent.height
                 text: "start Scenario"
                 onClicked: {
-                     var canPageAddressAssighnable= RecorderPageManagment.addPageNumberToUsedList(parseInt(tf_pageAddress.text),parseInt(text_totalTime.text),true,true);
+                     var canPageAddressAssighnable= RecorderPageManagment.addPageNumberToUsedList(parseInt(tf_pageAddress.text),parseInt(text_totalTime.text),true,true,true);
                 }
 
 
@@ -104,10 +106,26 @@ Window {
                 anchors.verticalCenter: parent.verticalCenter
                 text: "correct Last Scenario Record"
                 onClicked: {
-                    RecorderPageManagment.correctUsedRecordPage(parseInt(tf_actualLastScenarioTime));
+                    RecorderPageManagment.correctUsedRecordPage(parseInt(tf_actualLastScenarioTime.text));
                 }
             }
 
         }
+        Row{
+            width: parent.width
+            height: 40
+
+
+            Button{
+                id:btn_clearRecoder
+                anchors.verticalCenter: parent.verticalCenter
+                text: "Clear recorder content"
+                onClicked: {
+                    RecorderPageManagment.resetUsedPage();
+                }
+            }
+
+        }
+
     }
 }

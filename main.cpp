@@ -12,6 +12,9 @@ int main(int argc, char *argv[])
 
     qmlRegisterSingletonType<RecorderPageManagement>("com.test.RecorderPageManagment", 1, 0, "RecorderPageManagment", &RecorderPageManagement::qmlInstance);
 
+    RecorderPageManagement *recorderMang=RecorderPageManagement::instance();
+    recorderMang->generateMokingRecorderStructureFile();
+    recorderMang->readRecorderPageInfoFronFile();
 
     QGuiApplication app(argc, argv);
 

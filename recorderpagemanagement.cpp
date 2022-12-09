@@ -1,5 +1,6 @@
 #include "recorderpagemanagement.h"
 #include <QQmlEngine>
+#include <QFile>
 
 
 RecorderPageManagement* RecorderPageManagement::m_pThis = nullptr;
@@ -9,7 +10,7 @@ RecorderPageManagement::RecorderPageManagement(QObject *parent) : QObject(parent
 
 }
 
-bool RecorderPageManagement::addPageNumberToUsedList(qint32 currentPageNumber,qint32 totalTime,bool firstRequest,bool startRecord){
+bool RecorderPageManagement::addPageNumberToUsedList(qint32 currentPageNumber,qint32 totalTime,bool firstRequest,bool startRecord,bool showMessageEnabled){
 
     if(firstRequest==true){
         messageString.clear();
@@ -45,6 +46,8 @@ bool RecorderPageManagement::addPageNumberToUsedList(qint32 currentPageNumber,qi
             messageString.append(QString::number(currentPageNumber));
             if(startRecord==true){
                 recorderPagesUsed=recorderPagesUsedTemp;
+                lastUsedRecordPagesInTest=lastUsedRecordPagesInTestTemp;
+                saveRecorderPageInfoInFile();
             }
             showMessageToUserAndEndFunction(messageString);
             setWarningMessage(messageString);
@@ -65,6 +68,7 @@ bool RecorderPageManagement::addPageNumberToUsedList(qint32 currentPageNumber,qi
         if(startRecord==true){
             recorderPagesUsed=recorderPagesUsedTemp;
             lastUsedRecordPagesInTest=lastUsedRecordPagesInTestTemp;
+            saveRecorderPageInfoInFile();
         }
     }
 
@@ -78,7 +82,7 @@ bool RecorderPageManagement::addPageNumberToUsedList(qint32 currentPageNumber,qi
         qint32 nextPageNumber=currentPageNumber+1;
 
         firstRequest=false;
-        addPageNumberToUsedList(nextPageNumber,timeRemider,false,startRecord);
+        addPageNumberToUsedList(nextPageNumber,timeRemider,false,startRecord,true);
     }else{
         showMessageToUserAndEndFunction(messageString);
         messageString.append("True");
@@ -94,11 +98,17 @@ bool RecorderPageManagement::addPageNumberToUsedList(qint32 currentPageNumber,qi
 QVariantList RecorderPageManagement::recommedPageNumberForRecord(qint32 totalTime){
     QVariantList recommedPages={};
     for(int pageNumberIndex=1;pageNumberIndex<=recorderPagesCapacity.length();pageNumberIndex++){
-        bool canAssignThisPageForRecord=addPageNumberToUsedList(pageNumberIndex,totalTime,true,false);
+        bool canAssignThisPageForRecord=addPageNumberToUsedList(pageNumberIndex,totalTime,true,false,false);
         if(canAssignThisPageForRecord==true){
             recommedPages<<pageNumberIndex;
         }
     }
+    if(recommedPages.length()>0){
+        setWarningMessage("");
+    }else{
+        setWarningMessage("Not found record page. Maybe recoder is full");
+
+   }
     return recommedPages;
 }
 
@@ -110,7 +120,7 @@ void RecorderPageManagement::addPageNumberToUsedList_test(){
         //        }
         for(int totalTimeIndex=1;totalTimeIndex<50000;totalTimeIndex++){
             qDebug()<<pageNumberIndex<<totalTimeIndex;
-            addPageNumberToUsedList(pageNumberIndex,totalTimeIndex,true,false);
+            addPageNumberToUsedList(pageNumberIndex,totalTimeIndex,true,false,true);
         }
     }
 }
@@ -124,7 +134,7 @@ void RecorderPageManagement::correctUsedRecordPage(qint32 correctTotolTime)
 {
     for(int i=0;i<lastUsedRecordPagesInTest.length();i++){
         correctTotolTime=correctTotolTime-recorderPagesCapacity.at(lastUsedRecordPagesInTest.at(i)-1);
-        if(correctTotolTime<=0){
+        if(correctTotolTime<-(qint32)recorderPagesCapacity.at(lastUsedRecordPagesInTest.at(i)-1)){
             recorderPagesUsed.replace(lastUsedRecordPagesInTest.at(i)-1,0);
         }
     }
@@ -132,16 +142,107 @@ void RecorderPageManagement::correctUsedRecordPage(qint32 correctTotolTime)
 
 bool RecorderPageManagement::resetUsedPage()
 {
-
+    for(int i=0;i<recorderPagesUsed.length();i++){
+        recorderPagesUsedTemp.replace(i,0);
+        recorderPagesUsed.replace(i,0);
+        recordPageUseInTestNumber.replace(i,0);
+        corruptedRecordPage.replace(i,0);
+    }
+    lastUsedRecordPagesInTestTemp={};
+    lastUsedRecordPagesInTest={};
+    return  true;
 }
 
 bool RecorderPageManagement::readRecorderPageInfoFronFile()
 {
+    QString url="recorderStructure.csv";
+    QFile file(url);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return false;
+
+    QTextStream in(&file);
+
+    recorderPagesCapacity={};
+    recorderPagesUsed={};
+    corruptedRecordPage={};
+    recordPageUseInTestNumber={};
+
+    bool isHeaderFile=true;
+    while (!in.atEnd()) {
+        if(isHeaderFile){
+            isHeaderFile=false;
+        }else{
+            QString rowContent=in.readLine(); // reads line from file
+            QStringList  columnContent = rowContent.split(',');
+            recorderPagesCapacity<<columnContent.at(1).toInt();
+            recorderPagesUsed<<columnContent.at(2).toInt();
+            corruptedRecordPage<<columnContent.at(4).toInt();
+            recordPageUseInTestNumber<<columnContent.at(3).toInt();
+        }
+
+    }
+    file.close();
+    return true;
 
 }
 
 bool RecorderPageManagement::saveRecorderPageInfoInFile()
 {
+    QString url="recorderStructure.csv";
+    QFile file(url);
+    if (!file.open(QIODevice::ReadWrite |QIODevice::Truncate | QIODevice::Text))
+        return false;
+
+    QTextStream output(&file);
+
+    //header file
+    output<<"PageAddress,";
+    output<<"Capacity,";
+    output<<"used,";
+    output<<"Corrupted,";
+    output<<"TestNumber\n";
+
+
+    for(int i=0;i<recorderPagesCapacity.length();i++){
+        output<<QString::number(i+1)<<",";
+        output<<QString::number(recorderPagesCapacity.at(i))<<",";
+        output<<QString::number(recorderPagesUsed.at(i))<<",";
+        output<<QString::number(corruptedRecordPage.at(i))<<",";
+        output<<QString::number(recordPageUseInTestNumber.at(i))<<",\n";
+    }
+    file.close();
+    return true;
+
+}
+
+void RecorderPageManagement::generateMokingRecorderStructureFile()
+{
+    QList<quint32> recorderPagesCapacityMuck={200,200,500,1000,1200,350,450,80,4200,1000};
+    QString url="recorderStructure.csv";
+    QFile file(url);
+    if (!file.open(QIODevice::WriteOnly |QIODevice::Truncate | QIODevice::Text))
+        return;
+
+    QTextStream in(&file);
+    //header file
+    in<<"PageAddress,";
+    in<<"Capacity,";
+    in<<"used,";
+    in<<"Corrupted,";
+    in<<"TestNumber\n";
+    //
+
+    for(int i=0;i<recorderPagesCapacityMuck.length();i++){
+        in<<i+1;
+        in<<",";
+        in<<recorderPagesCapacityMuck.at(i);
+        in<<",";
+        in<<"0,";
+        in<<"0,";
+        in<<"0\n";
+    }
+
+    file.close();
 
 }
 
