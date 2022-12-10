@@ -28,6 +28,7 @@ public:
     Q_INVOKABLE bool resetUsedPage();
     Q_INVOKABLE bool readRecorderPageInfoFronFile();
     Q_INVOKABLE bool saveRecorderPageInfoInFile();
+    void determineCorruptedRecordPage(void);
 
     void generateMokingRecorderStructureFile();
 

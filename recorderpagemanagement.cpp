@@ -44,7 +44,8 @@ bool RecorderPageManagement::addPageNumberToUsedList(qint32 currentPageNumber,qi
         if(firstRequest==true){
             messageString.append("This recode Page Used Before:");
             messageString.append(QString::number(currentPageNumber));
-            if(startRecord==true){
+            if(startRecord==true){//squence of statement in this blocl is important
+                determineCorruptedRecordPage();
                 recorderPagesUsed=recorderPagesUsedTemp;
                 lastUsedRecordPagesInTest=lastUsedRecordPagesInTestTemp;
                 saveRecorderPageInfoInFile();
@@ -65,7 +66,8 @@ bool RecorderPageManagement::addPageNumberToUsedList(qint32 currentPageNumber,qi
     }else{
         recorderPagesUsedTemp.replace(currentPageNumber-1,1);
         lastUsedRecordPagesInTestTemp<<currentPageNumber;
-        if(startRecord==true){
+        if(startRecord==true){//squence of statement in this blocl is important
+            determineCorruptedRecordPage();
             recorderPagesUsed=recorderPagesUsedTemp;
             lastUsedRecordPagesInTest=lastUsedRecordPagesInTestTemp;
             saveRecorderPageInfoInFile();
@@ -204,6 +206,15 @@ bool RecorderPageManagement::saveRecorderPageInfoInFile()
     output<<"Corrupted,";
     output<<"TestNumber\n";
 
+    float maxTestNumber=std::numeric_limits<float>::min();
+    for(int i=0;i<recordPageUseInTestNumber.length();i++){
+        if(recordPageUseInTestNumber.at(i)>maxTestNumber){
+            maxTestNumber=recordPageUseInTestNumber.at(i);
+        }
+    }
+    for(int i=0;i<lastUsedRecordPagesInTest.length();i++){
+        recordPageUseInTestNumber.replace(lastUsedRecordPagesInTest.at(i)-1,maxTestNumber+1);
+    }
 
     for(int i=0;i<recorderPagesCapacity.length();i++){
         output<<QString::number(i+1)<<",";
@@ -215,6 +226,15 @@ bool RecorderPageManagement::saveRecorderPageInfoInFile()
     file.close();
     return true;
 
+}
+
+void RecorderPageManagement::determineCorruptedRecordPage()
+{
+    for(int i=0;i<lastUsedRecordPagesInTestTemp.length();i++){
+        if(recorderPagesUsed.at(lastUsedRecordPagesInTestTemp.at(i)-1)==1){
+            corruptedRecordPage.replace(lastUsedRecordPagesInTest.at(i)-1,1);
+        }
+    }
 }
 
 void RecorderPageManagement::generateMokingRecorderStructureFile()
