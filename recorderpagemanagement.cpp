@@ -169,11 +169,13 @@ bool RecorderPageManagement::readRecorderPageInfoFronFile()
 
     bool isHeaderFile=true;
     while (!in.atEnd()) {
+
+        QString rowContent=in.readLine(); // reads line from file
+        QStringList  columnContent = rowContent.split(',');
         if(isHeaderFile){
             isHeaderFile=false;
         }else{
-            QString rowContent=in.readLine(); // reads line from file
-            QStringList  columnContent = rowContent.split(',');
+
             recorderPagesCapacity<<columnContent.at(1).toInt();
             recorderPagesUsed<<columnContent.at(2).toInt();
             corruptedRecordPage<<columnContent.at(4).toInt();
@@ -208,7 +210,7 @@ bool RecorderPageManagement::saveRecorderPageInfoInFile()
         output<<QString::number(recorderPagesCapacity.at(i))<<",";
         output<<QString::number(recorderPagesUsed.at(i))<<",";
         output<<QString::number(corruptedRecordPage.at(i))<<",";
-        output<<QString::number(recordPageUseInTestNumber.at(i))<<",\n";
+        output<<QString::number(recordPageUseInTestNumber.at(i))<<"\n";
     }
     file.close();
     return true;

@@ -24,6 +24,31 @@ Window {
         Row{
             width: parent.width
             height: 40
+            CheckBox{
+                id:cb_record
+                width: 200
+                height: 40
+                text: "Mission record?"
+                onClicked: {
+                    if(cb_record.checkState==2){
+                        var suggestRecorderPageList= RecorderPageManagment.recommedPageNumberForRecord(parseInt(text_totalTime.text));
+                        if(suggestRecorderPageList.length>0){
+                            tf_pageAddress.text=suggestRecorderPageList[0];
+                        }
+                    }else if(cb_record.checkState==0){
+                        var canPageAddressAssighnable= RecorderPageManagment.addPageNumberToUsedList(0,parseInt(text_totalTime.text),true,false,true);
+                        tf_pageAddress.text="0";
+                    }
+
+
+                }
+                Component.onCompleted: {
+                    var defualtPageNUmber=0
+                    var canPageAddressAssighnable= RecorderPageManagment.addPageNumberToUsedList(parseInt(defualtPageNUmber),parseInt(text_totalTime.text),true,false,true);
+                    tf_pageAddress.text=defualtPageNUmber.toString();
+                }
+            }
+
             TextField{
                 id:tf_pageAddress
                 anchors.verticalCenter: parent.verticalCenter
@@ -64,6 +89,7 @@ Window {
                 anchors.verticalCenter: parent.verticalCenter
                 width: 100
                 height: parent.height
+                text: "150"
                 onTextChanged: {
                     var canPageAddressAssighnable= RecorderPageManagment.addPageNumberToUsedList(parseInt(tf_pageAddress.text),parseInt(text_totalTime.text),true,false,true);
 
