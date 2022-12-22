@@ -132,6 +132,7 @@ qint32 RecorderPageManagement::recommedPageNumberForRecord(qint32 totalTime){
 
 void RecorderPageManagement::addPageNumberToUsedList_test(){
     recorderPagesUsed={0,0,0,1,0,0,0,0,0,0};
+    recorderPagesUsed={0,0,0,1,0,0,0,0,0,0};
     for(int pageNumberIndex=-1;pageNumberIndex<12;pageNumberIndex++){
         //        for(int recorderPagesUsedIndex=0;recorderPagesUsedIndex<10;recorderPagesUsedIndex++){
         //          recorderPagesUsed.replace(recorderPagesUsedIndex,1);
@@ -196,8 +197,8 @@ bool RecorderPageManagement::readRecorderPageInfoFronFile()
 
             recorderPagesCapacity<<columnContent.at(1).toInt();
             recorderPagesUsed<<columnContent.at(2).toInt();
-            corruptedRecordPage<<columnContent.at(4).toInt();
-            recordPageUseInTestNumber<<columnContent.at(3).toInt();
+            corruptedRecordPage<<columnContent.at(3).toInt();
+            recordPageUseInTestNumber<<columnContent.at(4).toInt();
         }
 
     }
@@ -222,7 +223,7 @@ bool RecorderPageManagement::saveRecorderPageInfoInFile()
     output<<"Corrupted,";
     output<<"TestNumber\n";
 
-    float maxTestNumber=std::numeric_limits<float>::min();
+    float maxTestNumber=0;
     for(int i=0;i<recordPageUseInTestNumber.length();i++){
         if(recordPageUseInTestNumber.at(i)>maxTestNumber){
             maxTestNumber=recordPageUseInTestNumber.at(i);
