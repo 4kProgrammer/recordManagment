@@ -31,9 +31,9 @@ Window {
                 text: "Mission record?"
                 onClicked: {
                     if(cb_record.checkState==2){
-                        var suggestRecorderPageList= RecorderPageManagment.recommedPageNumberForRecord(parseInt(text_totalTime.text));
-                        if(suggestRecorderPageList.length>0){
-                            tf_pageAddress.text=suggestRecorderPageList[0];
+                        var suggestRecorderPage= RecorderPageManagment.recommedPageNumberForRecord(parseInt(text_totalTime.text));
+                        if(suggestRecorderPage!==-1){
+                            tf_pageAddress.text=suggestRecorderPage;
                         }
                     }else if(cb_record.checkState==0){
                         var canPageAddressAssighnable= RecorderPageManagment.addPageNumberToUsedList(0,parseInt(text_totalTime.text),true,false,true);
@@ -68,10 +68,10 @@ Window {
                 height: parent.height
                 text: "suggest Page add"
                 onClicked: {
-                     var suggestRecorderPageList= RecorderPageManagment.recommedPageNumberForRecord(parseInt(text_totalTime.text));
-                     console.log("su"+suggestRecorderPageList)
-                    if(suggestRecorderPageList.length>0){
-                        tf_pageAddress.text=suggestRecorderPageList[0];
+                     var suggestRecorderPage= RecorderPageManagment.recommedPageNumberForRecord(parseInt(text_totalTime.text));
+
+                    if(suggestRecorderPage!==-1){
+                        tf_pageAddress.text=suggestRecorderPage;
                     }
                 }
 

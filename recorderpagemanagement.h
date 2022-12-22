@@ -18,7 +18,7 @@ public:
 
 
     Q_INVOKABLE bool addPageNumberToUsedList(qint32 currentPageNumber,qint32 totalTime,bool firstRequest,bool startRecord,bool showMessageEnabled);
-    Q_INVOKABLE QVariantList recommedPageNumberForRecord(qint32 totalTime);
+    Q_INVOKABLE qint32 recommedPageNumberForRecord(qint32 totalTime);
     void addPageNumberToUsedList_test();
 
     void showMessageToUserAndEndFunction(QString message);

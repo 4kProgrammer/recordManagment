@@ -97,21 +97,37 @@ bool RecorderPageManagement::addPageNumberToUsedList(qint32 currentPageNumber,qi
 
 }
 
-QVariantList RecorderPageManagement::recommedPageNumberForRecord(qint32 totalTime){
+qint32 RecorderPageManagement::recommedPageNumberForRecord(qint32 totalTime){
     QVariantList recommedPages={};
+    QList<QVariantMap> possibleScenario={};
     for(int pageNumberIndex=1;pageNumberIndex<=recorderPagesCapacity.length();pageNumberIndex++){
         bool canAssignThisPageForRecord=addPageNumberToUsedList(pageNumberIndex,totalTime,true,false,false);
+
+
         if(canAssignThisPageForRecord==true){
-            recommedPages<<pageNumberIndex;
+            QVariantMap result={};
+            result.insert("startPage",pageNumberIndex);
+            result.insert("pageUsedLenght",lastUsedRecordPagesInTestTemp.length());
+            possibleScenario<<result;
         }
     }
-    if(recommedPages.length()>0){
+
+    qint32 recordPageWithMinUsedPages=-1;
+    qint32 minPageUse=100000;
+    for(int i=0;i<possibleScenario.length();i++){
+        if(possibleScenario.at(i).value("pageUsedLenght").toInt()<minPageUse){
+            minPageUse=possibleScenario.at(i).value("pageUsedLenght").toInt();
+            recordPageWithMinUsedPages=possibleScenario.at(i).value("startPage").toInt();
+        }
+    }
+
+    if(recordPageWithMinUsedPages!=-1){
         setWarningMessage("");
     }else{
         setWarningMessage("Not found record page. Maybe recoder is full");
 
    }
-    return recommedPages;
+    return recordPageWithMinUsedPages;
 }
 
 void RecorderPageManagement::addPageNumberToUsedList_test(){
