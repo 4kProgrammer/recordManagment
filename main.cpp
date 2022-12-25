@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 
     RecorderPageManagement *recorderMang=RecorderPageManagement::instance();
     recorderMang->generateMokingRecorderStructureFile();
-    recorderMang->readRecorderPageInfoFronFile();
+    recorderMang->readRecorderPageInfoFromFile();
 
     QGuiApplication app(argc, argv);
 

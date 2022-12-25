@@ -102,8 +102,6 @@ qint32 RecorderPageManagement::recommedPageNumberForRecord(qint32 totalTime){
     QList<QVariantMap> possibleScenario={};
     for(int pageNumberIndex=1;pageNumberIndex<=recorderPagesCapacity.length();pageNumberIndex++){
         bool canAssignThisPageForRecord=addPageNumberToUsedList(pageNumberIndex,totalTime,true,false,false);
-
-
         if(canAssignThisPageForRecord==true){
             QVariantMap result={};
             result.insert("startPage",pageNumberIndex);
@@ -122,7 +120,7 @@ qint32 RecorderPageManagement::recommedPageNumberForRecord(qint32 totalTime){
     }
 
     if(recordPageWithMinUsedPages!=-1){
-        setWarningMessage("");
+        setWarningMessage("true");
     }else{
         setWarningMessage("Not found record page. Maybe recoder is full");
 
@@ -130,8 +128,7 @@ qint32 RecorderPageManagement::recommedPageNumberForRecord(qint32 totalTime){
     return recordPageWithMinUsedPages;
 }
 
-void RecorderPageManagement::addPageNumberToUsedList_test(){
-    recorderPagesUsed={0,0,0,1,0,0,0,0,0,0};
+void RecorderPageManagement::addPageNumberToUsedList_test(){    
     recorderPagesUsed={0,0,0,1,0,0,0,0,0,0};
     for(int pageNumberIndex=-1;pageNumberIndex<12;pageNumberIndex++){
         //        for(int recorderPagesUsedIndex=0;recorderPagesUsedIndex<10;recorderPagesUsedIndex++){
@@ -169,10 +166,11 @@ bool RecorderPageManagement::resetUsedPage()
     }
     lastUsedRecordPagesInTestTemp={};
     lastUsedRecordPagesInTest={};
+    saveRecorderPageInfoInFile();
     return  true;
 }
 
-bool RecorderPageManagement::readRecorderPageInfoFronFile()
+bool RecorderPageManagement::readRecorderPageInfoFromFile()
 {
     QString url="recorderStructure.csv";
     QFile file(url);
@@ -203,6 +201,7 @@ bool RecorderPageManagement::readRecorderPageInfoFronFile()
 
     }
     file.close();
+    prepareDataToShowAsRecorderLayout();
     return true;
 
 }
@@ -241,6 +240,7 @@ bool RecorderPageManagement::saveRecorderPageInfoInFile()
         output<<QString::number(recordPageUseInTestNumber.at(i))<<"\n";
     }
     file.close();
+    prepareDataToShowAsRecorderLayout();
     return true;
 
 }
@@ -283,6 +283,19 @@ void RecorderPageManagement::generateMokingRecorderStructureFile()
 
     file.close();
 
+}
+
+void RecorderPageManagement::prepareDataToShowAsRecorderLayout()
+{
+    QVariantList data={};
+    for(int i=0;i<recorderPagesCapacity.length()*5;i=i+5){
+        data<<QString::number(i/5+1);
+        data<<QString::number(recorderPagesCapacity.at(i/5));
+        data<<QString::number(recorderPagesUsed.at(i/5));
+        data<<QString::number(corruptedRecordPage.at(i/5));
+        data<<QString::number(recordPageUseInTestNumber.at(i/5));
+    }
+    setRecoderLayoutData(data);
 }
 
 RecorderPageManagement *RecorderPageManagement::instance()

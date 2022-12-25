@@ -6,8 +6,8 @@ import com.test.RecorderPageManagment 1.0
 
 Window {
     visible: true
-    width: 640
-    height: 480
+    width: 800
+    height: 600
     title: qsTr("Hello World")
 
     Connections{
@@ -18,7 +18,7 @@ Window {
     }
     Column{
         width: parent.width
-        height: 200
+        height: 700
         spacing: 5
 
         Row{
@@ -152,6 +152,42 @@ Window {
             }
 
         }
+
+
+        ListView {
+            width: parent.width
+            height: 600
+            model: 10
+
+
+            delegate: Rectangle{
+                property int rowIndex: index
+                width: parent.width
+                height: 40
+                Row{
+                    width: parent.width
+                    height: parent.height
+                    Repeater{
+                        model: 5
+
+                        Rectangle{
+                            width: 80
+                            height: parent.height
+                            color: "#191919"
+                            property int columnIndex: index
+                            Text {
+                                text: RecorderPageManagment.recoderLayoutData[rowIndex*5+columnIndex]
+                                color: "white"
+                            }
+                        }
+                    }
+                }
+            }
+
+            highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
+            focus: true
+        }
+
 
     }
 }
